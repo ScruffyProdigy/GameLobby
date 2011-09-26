@@ -1,0 +1,22 @@
+=make_section "#{@user.email}'s profile" do
+  =make_section "Active Clashes" do
+    %ul
+      -for clash in @user.clashes.playing
+        %li
+          =link_to clash.game.name, clash.game
+          =" --- "
+          =link_to clash.name, clash
+  =make_section "Forming Clashes" do
+    %ul
+      -for clash in @user.clashes.forming
+        %li
+          =link_to clash.game.name, clash.game
+          =" --- "
+          =link_to clash.name, clash
+  =make_section "Finished Clashes" do
+    %ul
+      -for clash in @user.clashes.complete
+        %li
+          =link_to clash.game.name, clash.game
+          =" --- "
+          =link_to clash.name, clash

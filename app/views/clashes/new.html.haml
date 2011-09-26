@@ -1,0 +1,27 @@
+-if @clash.errors.any?
+  =make_section "Clash Errors" do
+    %ul
+      -for message in @clash.errors.full_messages
+        %li= message
+-if @player and @player.errors.any?
+  =make_section "Player Errors" do
+    %ul
+      -for message in @player.errors.full_messages
+        %li= message
+-if @form
+  =form_tag '/clashes' do
+    =hidden_field_tag 'clash[game_id]',@clash.game_id
+    -@form.each_pair do |key,value|
+      -key_string = "form[#{key}]"
+      -case value['type']
+      -when 'string'
+        %p
+          -if value['label']
+            =value['label']
+          =text_field_tag key_string
+      -when 'hidden'
+        -if value['value']
+          =hidden_field_tag key_string,value['value']
+        -else
+          =hidden_field_tag key_string
+    =submit_tag "Create this Clash!"

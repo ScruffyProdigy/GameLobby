@@ -1,0 +1,2 @@
+module ClashesHelper
+end

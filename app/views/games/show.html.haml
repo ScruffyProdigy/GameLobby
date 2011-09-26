@@ -1,0 +1,21 @@
+=make_section @game.name,{:class=>'game',:game_id=>@game.id} do
+  -if current_user and @game.is_developer? current_user
+    =make_section "Developer Info" do
+      %p
+        %b Website: 
+        =" #{@game.site}"
+      %p
+        %b>Comm Channel: 
+        =" #{@game.comm}"
+      %p= link_to "Edit this game's info", edit_game_path(@game)
+  =make_section "Clashes!" do
+    %ul.clashes
+      -for clash in @game.clashes.forming
+        =link_to clash,{:class=>"clash#{clash.id}"} do
+          %li= clash.name
+    -if current_user
+      %p
+        =form_for Clash.new, :url=>clashes_path do |f|
+          =f.hidden_field :game_id, :value=>@game.id
+          =f.submit "New Clash!"
+%p= link_to "Back to game list", games_path

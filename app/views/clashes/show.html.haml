@@ -1,0 +1,30 @@
+=make_section @clash.name,{:class=>'clash',:clash_id=>@clash.id} do
+  %p= @clash.description
+  %p
+    %b Status
+    = " #{@clash.status}"
+  =make_section "Players ready to clash!" do
+    %ul.player_lists
+      -for list in @clash.player_lists
+        =make_section list.name,{:class=>"player_list",:list_name=>list.name} do
+          %ul.players
+            -for player in list.players
+              =link_to player.user,{:class=>"player#{player.id}"} do
+                %li= player.user.email
+          %div{:class=>"join_clash#{list.full? ? ' hideme' : ''}"}
+            =form_for @clash do |f|
+              =f.hidden_field :action, :value=>'joining'
+              =f.hidden_field :list, :value=>list.name
+              =f.submit "Join Clash! (in this spot right here)"
+  -if logged_in? and @clash.joined? current_user and @clash.forming?
+    =form_for @clash do |f|
+      =f.hidden_field :action, :value=>'leaving'
+      =f.submit "Leave Clash!"
+    %div{:class=>"start_clash#{@clash.startable? ? '' : ' hideme'}"}
+      =form_for @clash do |f|
+        =f.hidden_field :action, :value=>'starting'
+        =f.submit "Start Clash!"
+  -if @clash.playing?
+    =form_for @clash do |f|
+      =f.hidden_field :action, :value=>'playing'
+      =f.submit "Head to the clash!"

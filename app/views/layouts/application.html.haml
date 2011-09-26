@@ -1,0 +1,19 @@
+!!! 5
+%html
+  %head
+    %title GameLobby
+    =stylesheet_link_tag :all
+    =javascript_include_tag :defaults
+    =csrf_meta_tag
+  %body
+    %nav.login
+      %ul
+        -if current_user
+          %li="Logged in as #{current_user.email}"
+          %li=link_to "log out", log_out_path
+        -else
+          %li=link_to "log in", log_in_path
+          %li=link_to "join", sign_up_path
+    -flash.each do |name,msg|
+      =content_tag :div,msg,:id=>"flash#{name}"
+    =yield

@@ -1,0 +1,6 @@
+=make_section "Game List",{:class=>'games list'} do
+  %ul.games
+    -for game in @games
+      %li{:class => "game_#{game.id}"}
+        =link_to game.name, game
+  =link_to "Add New Game", new_game_path
