@@ -40,8 +40,9 @@ class ClashesController < ApplicationController
       begin
         form_info = params[:form] or nil
         @clash.add_user current_user,params[:clash][:list],form_info
-      rescue PlayerJoinError
+      rescue PlayerJoinError => error
         #should flash error info
+        flash[:error] = error.to_s
         respond_with @clash
       rescue NeedJoinForm => error
         #need form filled out to continue

@@ -8,6 +8,10 @@ class PlayerList < ActiveRecord::Base
   end
   
   def full?
-    Player.where(:player_list_id=>self.id).count >= self.player_count
+    if self.id
+      Player.where(:player_list_id=>self.id).count >= self.player_count
+    else
+      return false
+    end
   end
 end

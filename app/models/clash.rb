@@ -33,12 +33,16 @@ class Clash < ActiveRecord::Base
   end
 
   def find_player_list list_name
-    player_lists.each do |player_list|
-      if player_list.name == list_name
-        return player_list
+    unless self.creating?
+      PlayerList.where(:clash_id=>self.id,:name=>list_name).first
+    else
+      player_lists.each do |player_list|
+        if player_list.name == list_name
+          return player_list
+        end
       end
+      return nil
     end
-    return nil
   end
 
   def get_clash_info
@@ -87,7 +91,7 @@ class Clash < ActiveRecord::Base
   end
   
   def start_forming user,form=nil
-    raise ClashCreationError, "You must be logged in to create a clash" if user.nil?
+    raise Exceptions::ClashCreationError, "You must be logged in to create a clash" if user.nil?
     try_to_create(user,form) do |status,data|
       case status
       when 'game'
@@ -105,13 +109,13 @@ class Clash < ActiveRecord::Base
   end
   
   def add_user user,list,form=nil
-    raise PlayerJoinError, "You Must be logged in to join" if user.nil?
-    raise PlayerJoinError, "Which section are you trying to join" if list.nil?
-    raise PlayerJoinError, "Can't join a clash unless it is still forming" unless forming? or creating?
+    raise Exceptions::PlayerJoinError, "You Must be logged in to join" if user.nil?
+    raise Exceptions::PlayerJoinError, "Which section are you trying to join" if list.nil?
+    raise Exceptions::PlayerJoinError, "Can't join a clash unless it is still forming" unless forming? or creating?
     
     the_list = find_player_list list
-    raise PlayerJoinError, "Can't find the requested section to join" unless the_list
-    raise PlayerJoinError, "Sorry, but that section is currently full" if the_list.full?
+    raise Exceptions::PlayerJoinError, "Can't find the requested section to join" unless the_list
+    raise Exceptions::PlayerJoinError, "Sorry, but that section is currently full" if the_list.full?
     
     
     try_to_join(user,list,form) do |status,data|
@@ -132,10 +136,10 @@ class Clash < ActiveRecord::Base
   end
   
   def remove_user user
-    raise PlayerLeaveError, "You must be logged in to leave" if user.nil?
+    raise Exceptions::PlayerLeaveError, "You must be logged in to leave" if user.nil?
     player = find_player user
     
-    raise PlayerLeaveError, "You were not part of this clash" if player.nil?
+    raise Exceptions::PlayerLeaveError, "You were not part of this clash" if player.nil?
     player.leave_clash
   end
   
@@ -161,7 +165,7 @@ class Clash < ActiveRecord::Base
         push_starting
         redirect_to @clash.url
       when 'fail'
-        raise ClashStartError, data['error']
+        raise Exceptions::ClashStartError, data['error']
       end
     end
   end
@@ -169,29 +173,41 @@ class Clash < ActiveRecord::Base
   protected
   
   def try_to_create user,form
+    message = {}
+
     if form
-      message = {:type=>:gameform,:user=>user.url,:data=>JSON.generate(form)}
+      message[:type] = :gameform
+      message[:data] = JSON.generate(form)
     else
-      message = {:type=>:game,:user=>user.url}
+      message[:type] = :game
     end
+    message[:user] = user.url
     
     response = self.game.send_message(message)
     yield response['status'],response['data']
   end
 
   def try_to_join user,list,form
+    message = {}
+
     if form
-      message = {:type=>:joinform,:user=>user.url,:data=>form}
+      message[:type] = :joinform
+      message[:data] = JSON.generate(form)
     else
-      message = {:type=>:join,:user=>user.url}
+      message[:type] = :join
     end
+    message[:user] = user.url
+    message[:clash] = get_clash_info
     
     response = self.game.send_message(message)
     yield response['status'],response['data']
   end
   
   def try_to_start
-    message = {:type=>:start,:clash=>get_clash_info,:players=>show_player_lists}
+    message = {}
+    message[:type] = :start    
+    message[:clash] = get_clash_info
+    message[:players] = show_player_lists
 
     response = self.game.send_message(message)
     yield response['status'],response['data']
