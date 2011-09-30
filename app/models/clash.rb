@@ -46,16 +46,25 @@ class Clash < ActiveRecord::Base
   end
 
   def get_clash_info
-    #FIXME!
-    #This function should give a JSON representation of the public and private data for this clash
     clash_info = {};
+
+    clash_info[:public] = self.public_data
+    clash_info[:private] = self.private_data
+
+    return clash_info
   end
 
   def show_player_lists
-    #FIXME!
-    #This function should give a JSON list of all players sorted by player lists
-    #Each Player should also show their public and private data
-    player_list = {};
+    global_player_list = {};
+    
+    player_lists.each do |player_list|
+      global_player_list[player_list[:name]] = []
+      player_list.players.each do |player|
+        global_player_list[player_list[:name]] << player.user.url
+      end
+    end
+    
+    return global_player_list
   end
 
   def player_search user
@@ -163,7 +172,6 @@ class Clash < ActiveRecord::Base
       when 'start'  
         start_clash data['url']
         push_starting
-        redirect_to @clash.url
       when 'fail'
         raise Exceptions::ClashStartError, data['error']
       end

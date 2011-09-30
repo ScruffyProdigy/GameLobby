@@ -1,6 +1,7 @@
 module Exceptions
   class ClashCreationError < StandardError; end
   class ClashStartError < StandardError; end
+  class ClashPlayError < StandardError; end
   class PlayerJoinError < StandardError; end
   class PlayerLeaveError < StandardError; end
   
