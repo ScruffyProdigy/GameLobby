@@ -1,4 +1,4 @@
-require "exceptions.rb"
+require 'exceptions'
 
 class ApplicationController < ActionController::Base
   protect_from_forgery
@@ -17,7 +17,7 @@ class ApplicationController < ActionController::Base
   def push_data channel, data
     jsonized_data = JSON.generate(data)
     logger.info("pushing #{jsonized_data} to #{channel}")
-    @redis.publish(channel,jsonized_data)
+    @redis.publish(channel, jsonized_data)
   end
   
   def current_user
@@ -25,7 +25,7 @@ class ApplicationController < ActionController::Base
   end
   
   def logged_in?
-    !current_user.nil?
+    not current_user.nil?
   end
   
 end
