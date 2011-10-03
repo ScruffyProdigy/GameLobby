@@ -12,8 +12,8 @@ gem 'bcrypt-ruby', :require => 'bcrypt'
 
 gem 'redis'
 
-gem "jquery-rails"
-
+gem 'jquery-rails'
+gem 'cucumber-rails'
 
 # Use unicorn as the web server
 # gem 'unicorn'
