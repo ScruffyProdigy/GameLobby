@@ -1,3 +1,12 @@
+Given /^Redis is running$/ do
+  redis = Redis.new
+  begin
+    redis.get('foo')
+  rescue Errno::ECONNREFUSED
+    raise 'You need to run \'redis-server\''
+  end
+end
+
 Given /^A user does not exist with an email of (.*)$/ do |email|
   user = User.where(:email=>email).first
   user.should == nil
@@ -37,13 +46,19 @@ Then /^I should not be signed in$/ do
 end
 
 def path_to page
-  return case page
+  case page
   when 'sign in'
     log_in_path
   when 'sign out'
     log_out_path
   when 'sign up'
     sign_up_path
+  when 'new game'
+    new_game_path
+  when 'first game'
+    game_path 1
+  else
+    raise "Undefined Page in path_to"
   end
 end
 
@@ -78,4 +93,41 @@ def sign_up email,password,confirmation
   fill_in 'user[password]', :with=>password
   fill_in 'user[password_confirmation]', :with=>confirmation
   click_button 'Sign Up!'
+end
+
+Given /^no games exist$/ do
+  Game.count.should == 0
+end
+
+When /^I create a game with name (.*), site (.*), and comm (.*)$/ do |name,site,comm|
+  visit path_to 'new game'
+  fill_in 'game[name]', :with=>name
+  fill_in 'game[site]', :with=>site
+  fill_in 'game[comm]', :with=>comm
+  click_button 'Make Game!'
+end
+
+Then /^there should only be (\d+) games?$/ do |number|
+  Game.count.should == number.to_i
+end
+
+Then /^I should be a developer for that game$/ do
+  page.should have_content('Developer Info')
+end
+
+Then /^I should not be a developer for that game$/ do
+  page.should_not have_content('Developer Info')
+end
+
+When /^I delete that game$/ do
+  click_link 'Edit this game\'s info'
+  click_button 'Delete this game'
+end
+
+Then /^there should be no games$/ do
+  Game.count.should == 0
+end
+
+Given /^a game exists with name (.*), site (.*), and comm (.*)$/ do |name,site,comm|
+  Game.create(:name=>name,:site=>site,:comm=>comm)
 end

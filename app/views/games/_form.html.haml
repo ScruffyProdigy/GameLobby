@@ -17,4 +17,4 @@
     =f.label :comm
     %br
     =f.text_field :comm
-  %p.button= f.submit
+  %p.button= f.submit @game.id.nil? ? "Make Game!" : "Adjust Game!"
