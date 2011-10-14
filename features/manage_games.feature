@@ -5,7 +5,6 @@ Feature: Manage Games
   
   Background:
     Given I am signed in as test@email.com
-    And Redis is running
   
   Scenario: I create a game and then later delete a game
     Given no games exist

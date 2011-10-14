@@ -1,3 +1,97 @@
+require 'stub_game_server'
+
+def path_to page
+  case page
+  when 'sign in'
+    log_in_path
+  when 'sign out'
+    log_out_path
+  when 'sign up'
+    sign_up_path
+  when 'new game'
+    new_game_path
+  when 'first game'
+    game_path 1
+  when 'first clash'
+    clash_path 1
+  else
+    raise "Undefined Page in path_to"
+  end
+end
+
+def create_user(email,password='password')
+  User.create(:email=>email,:password=>password,:password_confirmation=>password)
+end
+
+def get_user(email)
+  User.where(:email=>email).first
+end
+
+def get_or_create_user(email)
+  get_user(email) or create_user(email)
+end
+
+def sign_in email,password
+  visit path_to 'sign in'
+  fill_in 'email', :with=>email
+  fill_in 'password', :with=>password
+  click_button 'Sign In!'
+end
+
+def sign_up email,password,confirmation
+  visit path_to 'sign up'
+  fill_in 'user[email]', :with=>email
+  fill_in 'user[password]', :with=>password
+  fill_in 'user[password_confirmation]', :with=>confirmation
+  click_button 'Sign Up!'
+end
+
+def stock_game_data game_name
+  { 
+    'roshambo'=>{:name=>'roshambo',:site=>'http://localhost:8124/',:comm=>'http://localhost:8124/setup.json'},
+    'chess'=>{:name=>'chess',:site=>'http://localhost:8125/',:comm=>'http://localhost:8125/setup.json'}
+  }[game_name]
+end
+
+def stock_clash_options game_name
+  {
+    'roshambo'=>{:gamename=>'I\'m choosing \'Rock\'',:description=>'You better choose \'Paper\''},
+    'chess'=>{:gamename=>'Imma gonna kick your ass',:description=>'And you\'re gonna like it!'}
+  }[game_name]
+end
+
+def stock_clash_form game_name
+  result = {}
+  stock_clash_options(game_name).each_pair do |key,value|
+    result["form[#{key}]"] = value
+  end
+  
+end
+
+def default_game_data game_name
+  {:name=>game_name,:site=>"http://www.stub-version-of-#{game_name}.com/",:comm=>"http://www.stub-version-of-#{game_name}.com/setup.json"}
+end
+
+def get_game_data game_name
+  stock_game_data(game_name) or default_game_data(game_name)
+end
+
+def get_game game_name
+  Game.where(:name=>game_name).first
+end
+
+def create_game game_name
+  Game.create get_game_data game_name
+end
+
+def get_or_create_game game_name
+  get_game game_name or create_game game_name
+end
+
+def press_join_clash_button list_name
+  page.find(:css,"section[list_name='#{list_name}'] .join_clash input[type='submit']").click
+end
+
 Given /^Redis is running$/ do
   redis = Redis.new
   begin
@@ -8,22 +102,18 @@ Given /^Redis is running$/ do
 end
 
 Given /^A user does not exist with an email of (.*)$/ do |email|
-  user = User.where(:email=>email).first
+  user = get_user(email)
   user.should == nil
 end
 
 Given /^a user exists with an email of (.*) and password (.*)$/ do |email,password|
-  User.create(:email=>email,:password=>password,:password_confirmation=>password)
+  create_user(email,password)
 end
 
 Given /^I am signed in as (.*)$/ do |email|
-  user = User.create(:email=>email,:password=>'password')
-  sign_in email,'password'
+  user = create_user(email,'password')
+  sign_in(email,'password')
 end
-
-#When /^I sign up as (.*) with password (.*)$/ do |email,password|
-#  sign_up email,password,password
-#end
 
 When /^I sign up as (.*) with password (.*) and confirmation (.*),$/ do |email,password,confirmation|
   sign_up email,password,confirmation
@@ -44,24 +134,6 @@ end
 Then /^I should not be signed in$/ do
   page.should_not have_content('Logged in as ')
 end
-
-def path_to page
-  case page
-  when 'sign in'
-    log_in_path
-  when 'sign out'
-    log_out_path
-  when 'sign up'
-    sign_up_path
-  when 'new game'
-    new_game_path
-  when 'first game'
-    game_path 1
-  else
-    raise "Undefined Page in path_to"
-  end
-end
-
 Then /^a user with an email of (.*) should exist$/ do |email|
   user = User.where(:email=>email).first
   user.should_not == nil
@@ -78,21 +150,6 @@ end
 
 Then /^no users should exist$/ do
   User.count.should == 0
-end
-
-def sign_in email,password
-  visit path_to 'sign in'
-  fill_in 'email', :with=>email
-  fill_in 'password', :with=>password
-  click_button 'Sign In!'
-end
-
-def sign_up email,password,confirmation
-  visit path_to 'sign up'
-  fill_in 'user[email]', :with=>email
-  fill_in 'user[password]', :with=>password
-  fill_in 'user[password_confirmation]', :with=>confirmation
-  click_button 'Sign Up!'
 end
 
 Given /^no games exist$/ do
@@ -130,4 +187,82 @@ end
 
 Given /^a game exists with name (.*), site (.*), and comm (.*)$/ do |name,site,comm|
   Game.create(:name=>name,:site=>site,:comm=>comm)
+end
+
+Given /^there is a (.*) game$/ do |game_name|
+  get_or_create_game game_name
+end
+
+When /^I try to create a (.*) clash$/ do |game|
+  visit url_for Game.where(:name=>game).first
+  click_button "New Clash!"
+end
+
+Then /^I should see a clash creation form page$/ do
+  page.should have_content("We need some more information")
+end
+
+When /^I fill in the (.*) information(.*) and try to create the clash$/ do |game,extra_info|
+  stock_clash_options(game).each_pair do |key,value|
+    fill_in "form[#{key}]", :with=>value
+  end
+  click_button 'Create this Clash!'
+end
+
+Then /^there should be exactly (\d+) clash(?:es)?$/ do |clash_count|
+  Clash.count.should == clash_count.to_i
+end
+
+Then /^there should be exactly (\d+) player lists?$/ do |list_count|
+  PlayerList.count.should == list_count.to_i
+end
+
+Then /^(.*) should be a player in that clash$/ do |email|
+  Clash.first.all_user_search.where(:email=>email).should_not be_empty
+end
+
+
+Then /^(.*) should not be a player in that clash$/ do |email|
+  Clash.first.all_user_search.where(:email=>email).should be_empty
+end
+
+When /^I leave the clash$/ do
+  click_button 'Leave Clash!'
+end
+
+Then /^(.*) should be a player in the (.*) list$/ do |email,list|
+  player_list = Clash.first.find_player_list list
+  user = get_user email
+  player_list.joined?(user).should == true
+end
+
+Then /^(.*) should not be a player in the (.*) list$/ do |email,list|
+  player_list = Clash.first.find_player_list list
+  user = get_user email
+  player_list.joined?(user).should == false
+end
+
+When /^I become an? (.*) player for that clash$/ do |list|
+  press_join_clash_button list
+end
+
+Given /^(.*) has started a (.*) clash$/ do |email,game_name|
+  user = get_or_create_user email
+  game = get_or_create_game game_name
+  clash = Clash.new({:game_id=>game.id})
+  form = stock_clash_options game_name
+  clash.start_forming user,form
+end
+
+When /^I join the clash$/ do
+  visit path_to 'first clash'
+  press_join_clash_button 'players'
+end
+
+Then /^the clash should be startable$/ do
+  Clash.first.should be_startable
+end
+
+Then /^the clash should not be startable$/ do
+  Clash.first.should_not be_startable
 end

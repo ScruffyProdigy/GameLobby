@@ -67,9 +67,18 @@ class Clash < ActiveRecord::Base
     return global_player_list
   end
 
-  def player_search user
+  def all_player_search
     player_list_ids = PlayerList.where(:clash_id=>self.id).select(:id).all.map{|list|list.id}
-    Player.where(:player_list_id=>player_list_ids,:user_id=>user.id)
+    Player.where(:player_list_id=>player_list_ids)
+  end
+  
+  def all_user_search
+    user_ids = all_player_search.select(:user_id).all.map{|list|list.user_id}
+    User.where(:id=>user_ids)
+  end
+
+  def player_search user
+    all_player_search.where(:user_id=>user.id)
   end
 
   def find_player user

@@ -13,20 +13,22 @@ class Game < ActiveRecord::Base
   after_create :push_creation
   before_destroy :push_destruction
   
-  def send_message message
-    
+  def format_message message
     #   the post_form method below only takes a specific format for hashes.  First reformat the current message to make sure it fits 
     formatted_message = {}
     message.each_pair do |key,value|
       formatted_message[key.to_s] = value
     end
-    logger.info("Message to \"#{name}\": #{formatted_message}")
     
+    return formatted_message
+  end
+  
+  def communicate_with_game_server message
     #  separate out the host, port, and destination from the stored URI
     uri = URI.parse comm
     
     #  send out the POST    
-    res = Net::HTTP.post_form(uri,formatted_message)
+    res = Net::HTTP.post_form(uri,message)
     case res
     when Net::HTTPSuccess, Net::HTTPRedirection
       result = JSON.parse res.body
@@ -34,7 +36,14 @@ class Game < ActiveRecord::Base
       return result
     end
     logger.error("Error Response:#{res.class}")
-    return nil  
+    return nil
+  end
+  
+  def send_message message
+    formatted_message = format_message message
+    logger.info("Message to \"#{name}\": #{formatted_message}")
+    
+    return communicate_with_game_server formatted_message
   end
   
   def is_developer? user
