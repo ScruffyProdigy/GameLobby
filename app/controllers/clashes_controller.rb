@@ -1,5 +1,5 @@
 class ClashesController < ApplicationController
-  before_filter :find_clash, :only=>[:show,:edit,:update,:destroy]
+  before_filter :find_clash, :only => [:show,:edit,:update,:destroy]
   
   respond_to :html, :xml, :json
   

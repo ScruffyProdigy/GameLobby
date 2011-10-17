@@ -27,13 +27,6 @@ def sign_up email, password, confirmation
   click_button 'Sign Up!'
 end
 
-def stock_game_data game_name
-  { 
-    'roshambo' => { :name => 'roshambo', :site => 'http://localhost:8124/',:comm=>'http://localhost:8124/setup.json'},
-    'chess'=>{:name=>'chess',:site=>'http://localhost:8125/',:comm=>'http://localhost:8125/setup.json'}
-  }[game_name]
-end
-
 def stock_clash_options game_name
   {
     'roshambo'=>{:gamename=>'I\'m choosing \'Rock\'',:description=>'You better choose \'Paper\''},
@@ -49,24 +42,12 @@ def stock_clash_form game_name
   
 end
 
-def default_game_data game_name
-  {:name=>game_name,:site=>"http://www.stub-version-of-#{game_name}.com/",:comm=>"http://www.stub-version-of-#{game_name}.com/setup.json"}
-end
-
-def get_game_data game_name
-  stock_game_data(game_name) or default_game_data(game_name)
-end
-
 def get_game game_name
   Game.where(:name=>game_name).first
 end
 
 def create_game game_name
   Game.create get_game_data game_name
-end
-
-def get_or_create_game game_name
-  get_game game_name or create_game game_name
 end
 
 def press_join_clash_button list_name
@@ -167,7 +148,7 @@ Given /^a game exists with name (.*), site (.*), and comm (.*)$/ do |name,site,c
 end
 
 Given /^there is a (.*) game$/ do |game_name|
-  get_or_create_game game_name
+  FactoryGirl.create(:game, :name => game_name)
 end
 
 When /^I try to create a (.*) clash$/ do |game|
