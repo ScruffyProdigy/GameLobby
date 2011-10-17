@@ -86,7 +86,7 @@ class ClashesController < ApplicationController
 protected
   def find_clash
     begin
-      @clash = Clash.find(params[:id])
+      @clash = Clash.find params[:id]
     rescue ActiveRecord::RecordNotFound
       redirect_to games_path
     end

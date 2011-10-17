@@ -1,5 +1,5 @@
 class GamesController < ApplicationController
-  before_filter :load_game, :exceot => [ :index, :new, :create ]
+  before_filter :load_game, :except => [ :index, :new, :create ]
   before_filter :ensure_logged_in, :except => [ :index, :show ]
   before_filter :ensure_is_developer, :only => [ :edit, :update, :destroy ]
   

@@ -41,5 +41,5 @@ group :test do
   gem 'rspec-rails'
   gem 'capybara'
   gem 'database_cleaner'
-  gem 'rack'
+  gem 'factory_girl_rails'
 end

@@ -10,6 +10,18 @@ module NavigationHelpers
 
     when /^the home\s?page$/
       '/'
+    when /sign in(\spage)?/
+      log_in_path
+    when /sign out/
+      log_out_path
+    when /sign up/
+      sign_up_path
+    when /new game/
+      new_game_path
+    when /first game/
+      game_path 1
+    when /first clash/
+      clash_path 1
 
     # Add more mappings here.
     # Here is an example that pulls values out of the Regexp:

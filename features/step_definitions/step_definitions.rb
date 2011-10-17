@@ -1,24 +1,5 @@
 require 'stub_game_server'
 
-def path_to page
-  case page
-  when 'sign in'
-    log_in_path
-  when 'sign out'
-    log_out_path
-  when 'sign up'
-    sign_up_path
-  when 'new game'
-    new_game_path
-  when 'first game'
-    game_path 1
-  when 'first clash'
-    clash_path 1
-  else
-    raise "Undefined Page in path_to"
-  end
-end
-
 def create_user(email,password='password')
   User.create(:email=>email,:password=>password,:password_confirmation=>password)
 end
@@ -38,7 +19,7 @@ def sign_in email,password
   click_button 'Sign In!'
 end
 
-def sign_up email,password,confirmation
+def sign_up email, password, confirmation
   visit path_to 'sign up'
   fill_in 'user[email]', :with=>email
   fill_in 'user[password]', :with=>password
@@ -48,7 +29,7 @@ end
 
 def stock_game_data game_name
   { 
-    'roshambo'=>{:name=>'roshambo',:site=>'http://localhost:8124/',:comm=>'http://localhost:8124/setup.json'},
+    'roshambo' => { :name => 'roshambo', :site => 'http://localhost:8124/',:comm=>'http://localhost:8124/setup.json'},
     'chess'=>{:name=>'chess',:site=>'http://localhost:8125/',:comm=>'http://localhost:8125/setup.json'}
   }[game_name]
 end
@@ -62,7 +43,7 @@ end
 
 def stock_clash_form game_name
   result = {}
-  stock_clash_options(game_name).each_pair do |key,value|
+  stock_clash_options(game_name).each_pair do |key, value|
     result["form[#{key}]"] = value
   end
   
@@ -121,10 +102,6 @@ end
 
 When /^I sign in as (.*) with password (.*)$/ do |email,password|
   sign_in email,password
-end
-
-When /^I go to the (.*) page$/ do |page|
-  visit path_to page
 end
 
 Then /^I should be signed in$/ do
