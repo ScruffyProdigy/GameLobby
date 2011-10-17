@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.1'
+gem 'rails'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
@@ -13,7 +13,6 @@ gem 'bcrypt-ruby', :require => 'bcrypt'
 gem 'redis'
 
 gem 'jquery-rails'
-gem 'cucumber-rails'
 
 # Use unicorn as the web server
 # gem 'unicorn'
