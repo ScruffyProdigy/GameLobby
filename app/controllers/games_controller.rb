@@ -1,12 +1,13 @@
 class GamesController < ApplicationController
-  before_filter :find_game, :only=>[:show,:edit,:update,:destroy]
-  before_filter :ensure_logged_in, :except=>[:index,:show]
-  before_filter :ensure_is_developer, :only=>[:edit,:update,:destroy]
+  before_filter :load_game, :exceot => [ :index, :new, :create ]
+  before_filter :ensure_logged_in, :except => [ :index, :show ]
+  before_filter :ensure_is_developer, :only => [ :edit, :update, :destroy ]
   
   respond_to :html, :xml, :json
   
   def index
-    respond_with(@games = Game.all)
+    @games = Game.all
+    respond_with @games
   end
   
   def show
@@ -19,12 +20,12 @@ class GamesController < ApplicationController
   end
   
   def create
-    @game = Game.new(params[:game])
+    @game = Game.new params[:game]
     if @game.save
-      GameDeveloper.create({:game=>@game,:user=>current_user})
+      GameDeveloper.create :game => @game, :user=>current_user
       respond_with @game
     else
-      render "new"
+      render 'new'
     end
   end
   
@@ -33,24 +34,23 @@ class GamesController < ApplicationController
   end
   
   def update
-    if @game.update_attributes(params[:game])
+    if @game.update_attributes params[:game]
       respond_with @game
     else
-      render "edit"
+      render 'edit'
     end
   end
   
   def destroy
     @game.destroy
-    respond_with @game, :location=>games_path
+    respond_with @game, :location => games_path
   end
   
   protected
-  def find_game
-    @game = Game.find(params[:id])
-    if @game.nil?
-      redirect_to games_path
-    end
+  def load_game
+    @game = Game.find params[:id]
+    
+    render :status => 404 if @game.nil?
   end
   
   def ensure_logged_in
