@@ -8,8 +8,12 @@ def get_user(email)
   User.where(:email=>email).first
 end
 
-def get_or_create_user(email)
-  get_user(email) or create_user(email)
+def create_game(name)
+  game = FactoryGirl.create(:game, :name => name)
+end
+
+def get_game(name)
+  Game.where(:name=>name).first
 end
 
 def sign_in email,password
@@ -40,14 +44,6 @@ def stock_clash_form game_name
     result["form[#{key}]"] = value
   end
   
-end
-
-def get_game game_name
-  Game.where(:name=>game_name).first
-end
-
-def create_game game_name
-  Game.create get_game_data game_name
 end
 
 def press_join_clash_button list_name
@@ -148,7 +144,7 @@ Given /^a game exists with name (.*), site (.*), and comm (.*)$/ do |name,site,c
 end
 
 Given /^there is a (.*) game$/ do |game_name|
-  FactoryGirl.create(:game, :name => game_name)
+  create_game game_name
 end
 
 When /^I try to create a (.*) clash$/ do |game|
@@ -205,8 +201,8 @@ When /^I become an? (.*) player for that clash$/ do |list|
 end
 
 Given /^(.*) has started a (.*) clash$/ do |email,game_name|
-  user = get_or_create_user email
-  game = get_or_create_game game_name
+  user = get_user(email) or create_user(email)
+  game = get_game(game_name) or create_game(game_name)
   clash = Clash.new({:game_id=>game.id})
   form = stock_clash_options game_name
   clash.start_forming user,form

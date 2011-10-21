@@ -1,42 +1,65 @@
+require 'net/http'
+require 'rspec/mocks/methods'
+
+class FakeHTTPResponse
+  @body
+  def initialize body
+    @body = JSON.generate body
+  end
+  
+  def class
+    Net::HTTPSuccess
+  end
+  
+  def body
+    @body
+  end
+end
+
 class StubGameServer
   
   @servers = {}
+  @server_definitions = {}
   
   def self.name
     raise "Please define the name of #{to_s}" unless (match = /Stub(.*)Server/.match(to_s))
     match.captures[0].downcase
   end
   
-  def self.inherited(subclass)
-    raise "Overwriting an available class" if server_running? subclass.name
-    @servers[subclass.name] = subclass.new
+  def self.inherited subclass
+    raise "Overwriting an available class" if server_defined? subclass.name
+    @server_definitions[subclass.name] = subclass
   end
-  
-  def self.server_running? name
-    not @servers[name].nil?
-  end
-  
-  def self.call_server name,message
-    raise "Server \"#{name}\" not set! Choose from #{@servers.inspect}" unless server_running? name
-    raise "Server can't be called!" unless @servers[name].respond_to? :take_message
 
-    @servers[name].take_message(message)
+  def self.server_defined? name
+    not @server_definitions[name].nil?
   end
-  
-end
 
-class Game
-  alias_method :real_communicate_with_game_server, :communicate_with_game_server
-  def stub_communicate_with_game_server message
-    StubGameServer.call_server(self.name,message)
+  def self.create_server name,url
+    @server_definitions[name].new url
   end
   
-  def communicate_with_game_server message
-    begin
-      real_communicate_with_game_server message
-    rescue Errno::ECONNREFUSED => e
-      result = stub_communicate_with_game_server message
+  def self.set_server url,server
+    @servers[url.to_s] = server
+  end
+  
+  def initialize url
+    StubGameServer.set_server url,self
+    Net::HTTP.stub!(:post_form).and_return do |url, message|
+      StubGameServer.call_server url.to_s,message
     end
+  end
+  
+  def self.server_running? url
+    not @servers[url.to_s].nil?
+  end
+  
+  def self.call_server url,message
+    raise "Server at URL:\"#{url}\" not set! Choose from #{@servers.inspect}" unless server_running? url
+    raise "Server can't be called!" unless @servers[url].respond_to? :take_message
+
+    response = @servers[url].take_message( message )
+    res = FakeHTTPResponse.new(response)
   end
 end
 

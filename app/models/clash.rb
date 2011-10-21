@@ -201,6 +201,7 @@ class Clash < ActiveRecord::Base
     message[:user] = user.url
     
     response = self.game.send_message(message)
+    raise Exceptions::ClashCreationError unless response
     yield response['status'],response['data']
   end
 
@@ -217,6 +218,7 @@ class Clash < ActiveRecord::Base
     message[:clash] = get_clash_info
     
     response = self.game.send_message(message)
+    raise Exceptions::PlayerJoinError unless response
     yield response['status'],response['data']
   end
   
@@ -227,6 +229,7 @@ class Clash < ActiveRecord::Base
     message[:players] = show_player_lists
 
     response = self.game.send_message(message)
+    raise Exceptions::ClashStartError unless response
     yield response['status'],response['data']
   end
 

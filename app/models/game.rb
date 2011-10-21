@@ -29,8 +29,7 @@ class Game < ActiveRecord::Base
     
     #  send out the POST    
     res = Net::HTTP.post_form(uri,message)
-    case res
-    when Net::HTTPSuccess, Net::HTTPRedirection
+    if res.class == Net::HTTPSuccess or res.class == Net::HTTPRedirection
       result = JSON.parse res.body
       logger.info("Response: #{result}")
       return result
