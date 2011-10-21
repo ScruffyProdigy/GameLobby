@@ -7,7 +7,6 @@ Feature: Manage Games
     Given I am signed in as test@email.com
   
   Scenario: I create a game and then later delete a game
-    Given no games exist
     When I create a game with name TestGame, site http://testgame.com, and comm http://testgame.com/comm
     Then there should only be 1 game
     When I go to the first game page

@@ -1,15 +1,7 @@
 require 'stub_game_server'
 
-def create_user(email,password='password')
-  User.create(:email=>email,:password=>password,:password_confirmation=>password)
-end
-
-def get_user(email)
+def get_user email
   User.where(:email=>email).first
-end
-
-def create_game(name)
-  game = FactoryGirl.create(:game, :name => name)
 end
 
 def get_game(name)
@@ -43,33 +35,55 @@ def stock_clash_form game_name
   stock_clash_options(game_name).each_pair do |key, value|
     result["form[#{key}]"] = value
   end
-  
 end
 
 def press_join_clash_button list_name
   page.find(:css,"section[list_name='#{list_name}'] .join_clash input[type='submit']").click
 end
 
-Given /^Redis is running$/ do
-  redis = Redis.new
-  begin
-    redis.get('foo')
-  rescue Errno::ECONNREFUSED
-    raise 'You need to run \'redis-server\''
+def get_conditions string
+  words = string.lstrip.split
+  conditions = {}
+  if words.shift == 'with'
+    until words.empty?
+      condition = words.shift
+      next if condition == 'and'
+      if condition == 'a' or condition == 'an'
+        condition = words.shift
+        words.shift.should == 'of'
+      end
+      value = words.shift
+      if value
+        value.chop if value[-1] == ','
+        conditions[condition.to_sym] = value
+      end
+    end
   end
+  return conditions
 end
 
-Given /^A user does not exist with an email of (.*)$/ do |email|
-  user = get_user(email)
-  user.should == nil
+def select_with_conditions selection,conditions
+  conditions.each_pair do |key,value|
+    selection = selection.where(key=>value)
+  end
+  selection
 end
 
-Given /^a user exists with an email of (.*) and password (.*)$/ do |email,password|
-  create_user(email,password)
+def model_count model,conditions
+  conditions ||= ""
+  conditions = get_conditions conditions
+  selection = model.camelize.singularize.constantize
+  selection = select_with_conditions selection,conditions
+  selection.count.should
+end
+
+Given /^a (.*) exists (.*)$/ do |model,conditions|
+  conditions = get_conditions conditions
+  FactoryGirl.create(model.to_sym,conditions)
 end
 
 Given /^I am signed in as (.*)$/ do |email|
-  user = create_user(email,'password')
+  user = FactoryGirl.create :user,:email=>email
   sign_in(email,'password')
 end
 
@@ -88,39 +102,37 @@ end
 Then /^I should not be signed in$/ do
   page.should_not have_content('Logged in as ')
 end
-Then /^a user with an email of (.*) should exist$/ do |email|
-  user = User.where(:email=>email).first
-  user.should_not == nil
+
+Then /^a ([^\s]*)(.*)? should exist$/ do |model,conditions|
+  model_count(model,conditions).should > 0
 end
 
-Then /^no user with an email of (.*) should exist$/ do |email|
-  user = User.where(:email=>email).first
-  user.should == nil
+Then /^no ([^\s]*)(.*)? should exist$/ do |model,conditions|
+  model_count(model,conditions).should == 0
 end
 
-Then /^there should only be one user with email (.*)$/ do |email|
-  User.where(:email=>email).count.should == 1
+Then /^there should only be (\d) ([^\s]*)(.*)?$/ do |number,model,conditions|
+  model_count(model,conditions).should == number.to_i
 end
 
-Then /^no users should exist$/ do
-  User.count.should == 0
+Then /^there should be no ([^\s]*)(.*)?$/ do |model,conditions|
+  model_count(model,conditions).should == 0
 end
 
-Given /^no games exist$/ do
-  Game.count.should == 0
+Then /^there should be exactly (\d+) ([^\s]*)(.*)?$/ do |number,model,conditions|
+  model_count(model,conditions).should == number.to_i
 end
 
-When /^I create a game with name (.*), site (.*), and comm (.*)$/ do |name,site,comm|
+
+When /^I create a game(.*)$/ do |conditions|
+  conditions = get_conditions conditions
   visit path_to 'new game'
-  fill_in 'game[name]', :with=>name
-  fill_in 'game[site]', :with=>site
-  fill_in 'game[comm]', :with=>comm
+  conditions.each_pair do |condition,status|
+    fill_in "game[#{condition}]",:with=>status
+  end
   click_button 'Make Game!'
 end
 
-Then /^there should only be (\d+) games?$/ do |number|
-  Game.count.should == number.to_i
-end
 
 Then /^I should be a developer for that game$/ do
   page.should have_content('Developer Info')
@@ -135,16 +147,10 @@ When /^I delete that game$/ do
   click_button 'Delete this game'
 end
 
-Then /^there should be no games$/ do
-  Game.count.should == 0
-end
-
-Given /^a game exists with name (.*), site (.*), and comm (.*)$/ do |name,site,comm|
-  Game.create(:name=>name,:site=>site,:comm=>comm)
-end
-
-Given /^there is a (.*) game$/ do |game_name|
-  create_game game_name
+Given /^there is a (.*) game(.*)?$/ do |game_name,conditions|
+  conditions = get_conditions conditions
+  conditions[:name] = game_name
+  FactoryGirl.create(:game,conditions)
 end
 
 When /^I try to create a (.*) clash$/ do |game|
@@ -156,25 +162,21 @@ Then /^I should see a clash creation form page$/ do
   page.should have_content("We need some more information")
 end
 
-When /^I fill in the (.*) information(.*) and try to create the clash$/ do |game,extra_info|
+When /^I fill in the (.*) information(.*) and try to create the clash$/ do |game,conditions|
+  conditions.reverse.chop.reverse if conditions[0] == ','
+  conditions.chop if conditions[-1] == ','
   stock_clash_options(game).each_pair do |key,value|
     fill_in "form[#{key}]", :with=>value
   end
+  conditions.each_pair do |key,value|
+  #  fill_in "form[#{key}]", :with=>value
+  end
   click_button 'Create this Clash!'
-end
-
-Then /^there should be exactly (\d+) clash(?:es)?$/ do |clash_count|
-  Clash.count.should == clash_count.to_i
-end
-
-Then /^there should be exactly (\d+) player lists?$/ do |list_count|
-  PlayerList.count.should == list_count.to_i
 end
 
 Then /^(.*) should be a player in that clash$/ do |email|
   Clash.first.all_user_search.where(:email=>email).should_not be_empty
 end
-
 
 Then /^(.*) should not be a player in that clash$/ do |email|
   Clash.first.all_user_search.where(:email=>email).should be_empty
@@ -201,8 +203,8 @@ When /^I become an? (.*) player for that clash$/ do |list|
 end
 
 Given /^(.*) has started a (.*) clash$/ do |email,game_name|
-  user = get_user(email) or create_user(email)
-  game = get_game(game_name) or create_game(game_name)
+  user = get_user(email) or FactoryGirl.create(:user,:email=>email)
+  game = get_game(game_name) or FactoryGirl.create(:game,:name=>game_name)
   clash = Clash.new({:game_id=>game.id})
   form = stock_clash_options game_name
   clash.start_forming user,form

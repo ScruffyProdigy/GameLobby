@@ -10,7 +10,7 @@ Feature: Manage Clashes
     Then I should see a clash creation form page
     When I fill in the roshambo information and try to create the clash
     Then there should be exactly 1 clash
-    And there should be exactly 1 player list
+    And there should be exactly 1 player_list
     And test@email.com should be a player in that clash
     When I leave the clash
     Then there should be exactly 0 clashes
@@ -22,12 +22,12 @@ Feature: Manage Clashes
     Then I should see a clash creation form page
     When I fill in the chess information, choosing to start with white, and try to create the clash
     Then there should be exactly 1 clash
-    And there should be exactly 2 player lists
+    And there should be exactly 2 player_lists
     And test@email.com should be a player in the white list
     And test@email.com should not be a player in the black list
     When I become a black player for that clash
     Then there should be exactly 1 clash
-    And there should be exactly 2 player lists
+    And there should be exactly 2 player_lists
     And test@email.com should be a player in the black list
     And test@email.com should not be a player in the white list
     When I leave the clash
