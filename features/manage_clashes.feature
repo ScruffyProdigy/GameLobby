@@ -35,7 +35,7 @@ Feature: Manage Clashes
     
   Scenario: User joins a roshambo clash, and then leaves
     Given I am signed in as test@email.com
-    And a user exists with an email of test2@email.com and password password
+    And a user exists with an email of test2@email.com
     And there is a roshambo game
     And test2@email.com has started a roshambo clash
     Then test@email.com should not be a player in that clash
@@ -47,3 +47,11 @@ Feature: Manage Clashes
     Then test@email.com should not be a player in that clash
     And the clash should not be startable
     
+  Scenario: User joins a roshambo clash, and then starts
+    Given I am signed in as angry_bill@email.com
+    And a user exists with email calm_lola@email.com
+    And there is a roshambo game
+    And calm_lola@email.com has started a roshambo clash
+    When I join the clash
+    And I start the clash
+    Then I should be sent to the game page

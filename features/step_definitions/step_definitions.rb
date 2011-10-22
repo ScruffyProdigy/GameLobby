@@ -168,9 +168,9 @@ When /^I fill in the (.*) information(.*) and try to create the clash$/ do |game
   stock_clash_options(game).each_pair do |key,value|
     fill_in "form[#{key}]", :with=>value
   end
-  conditions.each_pair do |key,value|
+#  conditions.each_pair do |key,value|
   #  fill_in "form[#{key}]", :with=>value
-  end
+#  end
   click_button 'Create this Clash!'
 end
 
@@ -221,4 +221,26 @@ end
 
 Then /^the clash should not be startable$/ do
   Clash.first.should_not be_startable
+end
+
+When /^I start the clash$/ do
+  begin
+    class ActionController::Base
+      alias_method :old_redirect_to, :redirect_to
+    
+      def redirect_to url
+        render :inline=>StubGameServer.get_from_server(url)
+      end
+    end
+    
+    click_button 'Start Clash!'
+  ensure 
+    class ActionController::Base
+      alias_method :redirect_to, :old_redirect_to
+    end
+  end
+end
+
+Then /^I should be sent to the game page$/ do
+  pending
 end

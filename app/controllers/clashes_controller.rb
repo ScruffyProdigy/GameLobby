@@ -67,7 +67,8 @@ class ClashesController < ApplicationController
     when 'starting'
       begin
         @clash.start
-        redirect_to @clash.get_url(current_user)
+        url = @clash.get_url(current_user)
+        redirect_to url
         
       rescue ClashStartError
         respond_with @clash
