@@ -39,4 +39,9 @@ class User < ActiveRecord::Base
     #GIANT HACK!
     return "http://localhost/users/#{self.id}/"
   end
+  
+  def self.get_id_from_url url
+    match = /http:\/\/localhost\/users\/(\d+)\//.match(url)
+    match ? match[1] : nil
+  end
 end

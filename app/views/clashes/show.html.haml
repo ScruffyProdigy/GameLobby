@@ -17,14 +17,15 @@
               =f.hidden_field :list, :value=>list.name
               =f.submit "Join Clash! (in this spot right here)"
   -if logged_in? and @clash.joined? current_user and @clash.forming?
-    =form_for @clash do |f|
-      =f.hidden_field :action, :value=>'leaving'
-      =f.submit "Leave Clash!"
+    %div{:class=>"leave_clash"}
+      =form_for @clash do |f|
+        =f.hidden_field :action, :value=>'leaving'
+        =f.submit "Leave Clash!"
     %div{:class=>"start_clash#{@clash.startable? ? '' : ' hideme'}"}
       =form_for @clash do |f|
         =f.hidden_field :action, :value=>'starting'
         =f.submit "Start Clash!"
-  -if @clash.playing?
+  %div{:class=>"head_to_clash#{@clash.playing? ? '' : ' hideme'}"}
     =form_for @clash do |f|
       =f.hidden_field :action, :value=>'playing'
       =f.submit "Head to the clash!"

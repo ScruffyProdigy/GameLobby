@@ -1,0 +1,172 @@
+table,td,th{
+  border:0px;
+}  
+@-webkit-keyframes borderPulse {
+  from { margin: 0px 10px; padding:0px 0px;}
+  50% {margin: 0px 0px; padding:0px 10px;}
+  to { margin:0px 10px; padding:0px 0px}
+}
+
+.chessboard{
+  position: relative;
+  border-style:solid;
+  width:738px;
+  height:742px;
+}
+
+.chessboard td{
+  height: 80px;
+  width: 80px;
+  text-align: center;
+}
+
+.chessboard th{
+  background-color: #888;
+}
+
+.chessboard th.col{
+  height: 30px;
+}
+
+.chessboard th.row{
+  width: 30px;
+}
+
+.chessboard[yourturn]{
+  -webkit-animation-name: borderPulse;
+  -webkit-animation-duration: 2s;
+  -webkit-animation-iteration-count: infinite;
+  border-color: red;
+}
+
+.chessboard tr:nth-of-type(even) td:nth-of-type(even){
+  background-color: black;
+}  
+
+.chessboard tr:nth-of-type(odd) td:nth-of-type(odd){
+  background-color: black;
+}
+
+.chessboard tr:nth-of-type(even) td:nth-of-type(odd){
+  background-color: white;
+}
+
+.chessboard tr:nth-of-type(odd) td:nth-of-type(even){
+  background-color: white;
+}
+
+.piece{
+  
+  display: inline-block;
+  color: #888;
+  border: 2px solid gray;
+  
+  font-size: 165%;
+  text-align:center;
+  
+  -webkit-transition-property: padding;
+  -webkit-transition-duration: .5s;
+  -moz-transition-property: padding;
+  -moz-transition-duration: .5s;
+  -o-transition-property: padding;
+  -o-transition-duration: .5s;
+  transition-property: padding;
+  transition-duration: .5s;
+
+}
+
+.piece:after{
+  content: attr(type);
+}
+
+.piece[color='white']{
+  background-color:white;
+}
+
+.piece[color='black']{
+  background-color:black;
+}
+
+[movable]{
+  color: red;
+}
+
+td:hover .piece[controllable]{
+  border: 2px solid red;
+  padding: 15px 3px;
+}
+
+.move-target{
+  width:70px;
+  height:70px;
+  background-color:yellow;
+  display: inline-block;
+}
+
+.move-target[capture]{
+  background-color:red;
+}
+
+.blackout{
+  display: none;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  height: 738px;
+  width: 738px;
+  background-color:gray;
+  opacity:0.8;
+}
+
+.popup{
+  position: absolute;
+  top: 272px;
+  left: 272px;
+  width: 200px;
+  
+  text-align:center;
+}
+
+.popup ul{
+  position: absolute;
+  display: inline-block;
+  width: 250px;
+  background-color: white;
+  border: 4px solid red;
+  border-radius: 20px;
+  padding: 2px;
+}
+
+.popup li{
+  list-style: none;
+  border: 2px solid black;
+  border-radius: 20px;
+  padding: 5px;
+  margin: 5px;
+}
+
+.popup li:hover{
+  background-color:gray;
+}
+
+.error p{
+  text-align: center;
+}
+
+.error ul{
+  text-align:right;
+}
+
+.error li{
+  width: 50px;
+  display:inline-block;
+  text-align:center;
+}
+
+.promotion{
+  display: none;
+}
+
+.error{
+  display: none;
+}

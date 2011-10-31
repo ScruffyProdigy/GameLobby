@@ -2,3 +2,5 @@
 db/*.sqlite3
 log/*.log
 tmp/
+node_modules/*
+Test\ Games/*/node_modules/*

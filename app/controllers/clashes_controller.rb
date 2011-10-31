@@ -16,15 +16,15 @@ class ClashesController < ApplicationController
       form_info = params[:form] or nil
       @clash.start_forming current_user,form_info
       
-    rescue ClashCreationError
-      #should flash error info
+    rescue ClashCreationError => error
+      flash[:error] = error.to_s
       respond_with @clash.game
       
-    rescue PlayerJoinError
-      #should flash error info
+    rescue PlayerJoinError => error
+      flash[:error] = error.to_s
       respond_with @clash.game
       
-    rescue NeedCreateForm=>error
+    rescue NeedCreateForm => error
       #need form filled out to continue
       @form = error.form
       render :new
@@ -41,16 +41,17 @@ class ClashesController < ApplicationController
         form_info = params[:form] or nil
         @clash.add_user current_user,params[:clash][:list],form_info
       rescue PlayerJoinError => error
-        #should flash error info
         flash[:error] = error.to_s
         respond_with @clash
       rescue NeedJoinForm => error
         #need form filled out to continue
         @form = error.form
         respond_with @clash
-      rescue PlayerLeaveError
+      rescue PlayerLeaveError => error
         #player was trying to move to a different spot, but failed to leave the current one
         #should flash error info
+        flash[:error] = error.to_s
+        respond_with @clash
       else
         respond_with @clash
       end
@@ -58,8 +59,8 @@ class ClashesController < ApplicationController
       begin
         @game = @clash.game
         @clash.remove_user current_user
-      rescue PlayerLeaveError
-        #should flash error info
+      rescue PlayerLeaveError => error
+        flash[:error] = error.to_s
         respond_with @clash
       else
         respond_with @game

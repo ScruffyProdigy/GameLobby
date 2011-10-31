@@ -58,10 +58,15 @@ class Clash < ActiveRecord::Base
     global_player_list = {};
     
     player_lists.each do |player_list|
-      global_player_list[player_list[:name]] = []
+      current_list = []
       player_list.players.each do |player|
-        global_player_list[player_list[:name]] << player.user.url
+        player_info = {}
+        player_info[:url] = player.user.url
+        player_info[:publicdata] = player.public_data if player.public_data
+        player_info[:privatedata] = player.private_data if player.private_data
+        current_list << player_info
       end
+      global_player_list[player_list[:name]] = current_list
     end
     
     return global_player_list
@@ -104,7 +109,7 @@ class Clash < ActiveRecord::Base
     raise Exceptions::ClashPlayError, "You're not a player for this clash" unless player
     
     #FIXME!, should return a custom URL for each player, so that the game site knows which player just came into the game
-    return self.url
+    return self.url+"?player=#{player.in_game_id}"
     
   end
   
@@ -179,7 +184,7 @@ class Clash < ActiveRecord::Base
     try_to_start do |status,data|
       case status
       when 'start'  
-        start_clash data['url']
+        start_clash data
         push_starting
       when 'fail'
         raise Exceptions::ClashStartError, data['error']
@@ -201,7 +206,7 @@ class Clash < ActiveRecord::Base
     message[:user] = user.url
     
     response = self.game.send_message(message)
-    raise Exceptions::ClashCreationError unless response
+    raise Exceptions::ClashCreationError, "No response from server from Message: #{message.inspect}" unless response
     yield response['status'],response['data']
   end
 
@@ -216,6 +221,7 @@ class Clash < ActiveRecord::Base
     end
     message[:user] = user.url
     message[:clash] = get_clash_info
+    message[:list] = list
     
     response = self.game.send_message(message)
     raise Exceptions::PlayerJoinError unless response
@@ -225,8 +231,8 @@ class Clash < ActiveRecord::Base
   def try_to_start
     message = {}
     message[:type] = :start    
-    message[:clash] = get_clash_info
-    message[:players] = show_player_lists
+    message[:clash] = JSON.generate get_clash_info
+    message[:players] = JSON.generate show_player_lists
 
     response = self.game.send_message(message)
     raise Exceptions::ClashStartError unless response
@@ -294,11 +300,20 @@ class Clash < ActiveRecord::Base
     return player
   end
   
-  def start_clash url
+  def start_clash data
     raise Exceptions::ClashStartError, "Clash is not ready to start yet" unless startable?
     
+    logger.info data.inspect
+    
     self.status = 'playing'
-    self.url = url
+    self.url = data['url']
+    data['players'].each do |player_url,player_game_id|
+      user_id = User.get_id_from_url(player_url).to_i
+      logger.info "got #{user_id} from #{player_url}"
+      player = all_player_search.where(:user_id=>user_id).first or raise Exceptions::ClashStartError, "Server returned id for player that isn't in game"
+      player.in_game_id = player_game_id
+      player.save
+    end
     self.save
   end
   

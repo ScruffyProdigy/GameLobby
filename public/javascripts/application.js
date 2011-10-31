@@ -69,6 +69,12 @@ $(document).ready(function() {
           list.find('.join_clash').show(); //show the join button (if it was hidden before)
           $(clashbox).find('.start_clash').hide(); //hide the start button (if it was visible before)
         break;
+        
+        case 'clash_starting':
+          $(clashbox).find('.start_clash').hide();
+          $(clashbox).find('.leave_clash').hide();
+          $(clashbox).find('.head_to_clash').show();
+        break;
       }
     }
   });

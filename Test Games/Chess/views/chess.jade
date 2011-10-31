@@ -1,0 +1,50 @@
+!!! 5
+html(lang="en")
+  head
+    title Janky Chess Demo
+    link(rel="stylesheet", type="text/css", href="/styles/main.css")
+    script(type='text/javascript', src='/javascript/jquery.js')
+    script(type='text/javascript', src='/javascript/jquery-ui.js')
+    script(type='text/javascript', src='/socket.io/socket.io.js')
+    script(type='text/javascript', src='/javascript/connect.js')
+    script(type='text/javascript', src='/javascript/app.js')
+  body
+    section.chessboard(game=game.id,player=player.id,yourturn=yourturn)
+      table
+        -var letters = new Array('a','b','c','d','e','f','g','h')
+        tr
+          th.empty
+          -for(var i = 0;i < 8;i++)
+            th.col.top
+              =letters[i]
+          th.empty
+        -for(var y = 8; y > 0;y--)
+          tr
+            th.row.left
+              =y
+            -for(var x = 0;x < 8;x++)
+              -var location = letters[x]+y
+              -var pieces = board[location]
+              td(class=location)
+                -for(var i = 0;i < pieces.length;i++)
+                  -var piece = pieces[i]
+                  div.piece(type=piece.type,color=piece.color,movable=(movable.indexOf(piece.id) != -1),controllable=(piece.owner == player.id),piece_id=piece._id)
+            th.row.right
+              =y
+        tr
+          th.empty
+          -for(var i = 0;i < 8;i++)
+            th.col.bottom
+              =letters[i]
+          th.empty
+      section.blackout
+      section.error.popup
+        ul
+          p error message goes here
+          li.accept okay
+      section.promotion.popup
+        ul
+          li queen
+          li knight
+          li rook
+          li bishop

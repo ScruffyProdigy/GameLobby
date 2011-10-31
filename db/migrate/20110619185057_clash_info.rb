@@ -9,7 +9,7 @@ class ClashInfo < ActiveRecord::Migration
     end
     
     change_table :players do |t|
-      t.string :publc_data
+      t.string :public_data
       t.string :private_data
     end
   end
