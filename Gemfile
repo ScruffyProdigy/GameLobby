@@ -14,6 +14,7 @@ gem 'redis'
 
 gem 'jquery-rails'
 gem 'rake', '0.9.2'
+gem 'multi_json','1.0.3'
 
 # Use unicorn as the web server
  gem 'unicorn'
