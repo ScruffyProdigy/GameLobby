@@ -18,7 +18,7 @@ gem 'multi_json','1.0.3'
 gem 'activesupport','3.1.1'
 gem 'activemodel','3.1.1'
 gem 'rack','1.3.4'
-gem 'sprockets'
+gem 'sprockets','2.0.2'
 
 # Use unicorn as the web server
  gem 'unicorn'
