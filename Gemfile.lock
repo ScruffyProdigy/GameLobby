@@ -151,6 +151,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  actionmailer (= 3.1.1)
   actionpack (= 3.1.1)
   activemodel (= 3.1.1)
   activesupport (= 3.1.1)

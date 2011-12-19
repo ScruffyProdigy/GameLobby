@@ -22,6 +22,7 @@ gem 'sprockets','2.0.2'
 gem 'actionpack','3.1.1'
 gem 'mime-types','1.16'
 gem 'polyglot','0.3.2'
+gem 'actionmailer','3.1.1'
 
 # Use unicorn as the web server
  gem 'unicorn'
