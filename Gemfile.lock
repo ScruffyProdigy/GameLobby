@@ -174,5 +174,6 @@ DEPENDENCIES
   rspec-rails
   sprockets (= 2.0.2)
   sqlite3
+  tzinfo (= 0.3.30)
   unicorn
   watchr
