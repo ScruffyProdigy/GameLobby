@@ -1,16 +1,16 @@
 source 'http://rubygems.org'
 
-gem 'rails'
+gem 'rails','3.1.1'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
-gem 'sqlite3'
+gem 'sqlite3','1.3.4'
 
-gem 'haml'
-gem 'bcrypt-ruby', :require => 'bcrypt'
+gem 'haml','3.1.3'
+gem 'bcrypt-ruby','3.0.1', :require => 'bcrypt'
 
-gem 'redis'
+gem 'redis','2.2.2'
 
 
 gem 'actionmailer','3.1.1'
