@@ -1,4 +1,4 @@
-require 'exceptions'
+require 'Exceptions.rb'
 
 class ApplicationController < ActionController::Base
   protect_from_forgery
