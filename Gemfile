@@ -69,14 +69,14 @@ gem 'xpath', '0.1.4'
 # and rake tasks are available in development mode:
 
 group :test do
-  gem 'cucumber'
-  gem 'cucumber-rails'
-  gem 'rspec'
-  gem 'rspec-rails'
-  gem 'capybara'
-  gem 'database_cleaner'
-  gem 'factory_girl_rails'
-  gem 'watchr'
+  gem 'cucumber', '1.1.0'
+  gem 'cucumber-rails', '1.1.1'
+  gem 'rspec', '2.7.0'
+  gem 'rspec-rails', '2.7.0'
+  gem 'capybara', '1.1.1'
+  gem 'database_cleaner', '0.6.7'
+  gem 'factory_girl_rails', '1.3.0'
+  gem 'watchr', '0.7'
 
 
   gem 'childprocess', '0.2.2'
