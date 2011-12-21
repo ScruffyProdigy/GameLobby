@@ -48,20 +48,6 @@ gem 'treetop', '1.4.10'
 gem 'tzinfo','0.3.30'
 gem 'xpath', '0.1.4'
 
-
-gem 'childprocess', '0.2.2'
-gem 'diff-lcs', '1.1.3'
-gem 'factory_girl', '2.2.0'
-gem 'ffi', '1.0.9'
-gem 'gherkin', '2.5.2'
-gem 'rdoc', '3.10'
-gem 'rspec-core', '2.7.0'
-gem 'rspec-expectations', '2.7.0'
-gem 'rspec-mocks', '2.7.0'
-gem 'rubyzip', '0.9.4'
-gem 'selenium-webdriver', '2.8.0'
-gem 'term-ansicolor', '1.0.7'
-
 # Use unicorn as the web server
  gem 'unicorn'
 
@@ -91,4 +77,18 @@ group :test do
   gem 'database_cleaner'
   gem 'factory_girl_rails'
   gem 'watchr'
+
+
+  gem 'childprocess', '0.2.2'
+  gem 'diff-lcs', '1.1.3'
+  gem 'factory_girl', '2.2.0'
+  gem 'ffi', '1.0.9'
+  gem 'gherkin', '2.5.2'
+  gem 'rdoc', '3.10'
+  gem 'rspec-core', '2.7.0'
+  gem 'rspec-expectations', '2.7.0'
+  gem 'rspec-mocks', '2.7.0'
+  gem 'rubyzip', '0.9.4'
+  gem 'selenium-webdriver', '2.8.0'
+  gem 'term-ansicolor', '1.0.7'
 end
